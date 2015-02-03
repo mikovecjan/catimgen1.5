@@ -68,7 +68,7 @@ class catimgen extends Module {
         $counter_empty_no_product = count(self::$category_imager->image_list_no_product);
         $output = "<h2>{$this->l('Category for repair')} ({$counter_empty} / {$counter_empty_no_product})</h2>";
         $output .= "<form action=\"{$_SERVER['REQUEST_URI']}\" method=\"post\" enctype=\"multipart/form-data\">";
-        $output .= "<fieldset><legend>{$this->l('Category images creator')}</legend>";
+        $output .= "<fieldset><legend>{$this->l('Category images generator')}</legend>";
         $output .= "<fieldset><legend>{$this->l('Create all images')}</legend>"
                 . "<label for=\"generate_all\">{$this->l('Create all images')}</label>"
                 . "<input type=\"checkbox\" name=\"generate_all\" /></legend></fieldset>";

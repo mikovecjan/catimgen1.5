@@ -38,24 +38,15 @@ class Create_Images_Generator extends catimgen {
                 FROM    `ps_category_lang` 
                 WHERE   `id_shop` = {$id_shop}
                 AND     `id_lang` = {$id_lang}";
-//        echo $sql;
         $return = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
-//        echo count($return);
         foreach ($return as $index => $value) {            
             if (!in_array((int) $value['id_category'], $this->image_list)) {    
-//                echo "FOR CAT {$value['id_category']}<br />";
                 $product = $this->Get_category_product((int) $value['id_category']);                
                 if (($product != null) && (count($product) > 0)) {
                     $this->image_list_empty[(int) $value['id_category']] = (array)$product; // seznam kategorii bez obrazku ale s produktem, pak dohledat narazene
                 } else {
-                    $this->image_list_no_product[] = (int) $value['id_category'];// seznam kategorii bez obrazku a bez produktu
-                    //$this->associate_product_image_for_parent_categories((int) $value['id_category'], (array)$product);
-                    
+                    $this->image_list_no_product[] = (int) $value['id_category'];// seznam kategorii bez obrazku a bez produktu                    
                 }
-                //$this->Repair_no_products_category_image();
-            }
-            else{
-//                echo "FOR CAT {$value['id_category']}<br />";
             }
         }
     }
@@ -67,7 +58,6 @@ class Create_Images_Generator extends catimgen {
         }
     }
     
-    /* Pro nadrazene kategorie priradi obrazek produktu z ditete ktery je ma*/
     public function associate_product_image_for_parent_categories($id_category){   
        
         if($id_category > 0 ){
@@ -88,7 +78,6 @@ class Create_Images_Generator extends catimgen {
         }        
     }
     
-    /* get parent of category */
     public function Get_parent_of_category($id_category, $id_shop = 0){
         if ($id_shop == 0) {
             $id_shop = Context::getContext()->shop->id;
@@ -112,8 +101,7 @@ class Create_Images_Generator extends catimgen {
                         else{
                             return null;
                         }
-                    }
-                
+                    }                
             }
             else{
                 return null;
@@ -121,9 +109,7 @@ class Create_Images_Generator extends catimgen {
         }        
         else{ return null; }
     }
-    
 
-    /* return category => array(int id_product => int id_image, ... ) co maji nejaky image image */
     public function Get_category_product($id_category = 0, $id_shop = 0) {
         if ($id_shop == 0) {
             $id_shop = Context::getContext()->shop->id;
@@ -137,7 +123,6 @@ class Create_Images_Generator extends catimgen {
             $sql .= " WHERE cp.id_category = {$id_category} ORDER BY cp.position ASC,sa.quantity DESC;";
             $return = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS($sql);
 
-            /* test zda existuje pro id productu - id_image skutecne obrazek a ulozi cestu k obrazku */
             $accepted_images = array();
             foreach ($return as $index => $value) {
                 (string) $image_path = $this->Create_product_image_path($value["id_image"]);
@@ -153,10 +138,6 @@ class Create_Images_Generator extends catimgen {
         }
     }
 
-    /* kategorie pro ktere nebyli produkty nalezeny => kategorie nadrazene koncove. Produkt je vetsinou zadan do posledni kategorie */
-
-    
-
     public function Create_category_image_path($image_id) {
         return _PS_CAT_IMG_DIR_ . "{$this->Create_image_path($image_id)}{$image_id}.jpg";
     }
@@ -164,8 +145,6 @@ class Create_Images_Generator extends catimgen {
     public function Create_product_image_path($image_id) {
         return _PS_PROD_IMG_DIR_ . "{$this->Create_image_path($image_id)}{$image_id}.jpg";
     }
-
-    /* from int create path/path/ and return */
 
     public function Create_image_path($image_id) {
         $path = str_split($image_id);
@@ -176,20 +155,7 @@ class Create_Images_Generator extends catimgen {
         return $return;
     }
 
-    public function Create_image_folder($des, $id_image) {
-        $array_folder = str_split($id_image);
-        $created_dir_path = "";
-        foreach ($array_folder as $folder) {
-            $created_dir_path .= $folder . "/";
-            if (!file_exists($des . $created_dir_path))
-                mkdir($des . $created_dir_path, 0777);
-            chmod($des . $created_dir_path, 0777);
-        }
-        return true;
-    }
-
     public function Create_image_thumbs() {
-       //$image_type_list = ImageType::getImagesTypes('categories');
         $check_it = array();
         foreach ($this->image_list_empty as $id_category => $product) {
             $check_it[$id_category] = false;
@@ -197,23 +163,10 @@ class Create_Images_Generator extends catimgen {
                 if($check_it[$id_category] == false){
                     if(copy($prod_image['path'], _PS_CAT_IMG_DIR_ . "" . $id_category . '.jpg') === true){
                         $check_it[$id_category] = true;
-                        //sleep(1);
-                        //echo "was coppy" . $prod_image['path'], _PS_CAT_IMG_DIR_ . "" . $id_category . '.jpg<hr>';
                     }
                 }
             }
-            //copy(array_pop($product)['path'], _PS_CAT_IMG_DIR_ . "" . $id_category . '.jpg');
         }
-    }
-
-    public function recursive_array_search($needle, $haystack) {
-        foreach ($haystack as $key => $value) {
-            $current_key = $key;
-            if ($needle === $value OR ( is_array($value) && recursive_array_search($needle, $value) !== false)) {
-                return $current_key;
-            }
-        }
-        return false;
     }
 
 }
